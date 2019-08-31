@@ -34,7 +34,29 @@
         mysqli_stmt_execute($stmt_del);
         mysqli_stmt_close($stmt_del);
 
-        echo '<h3>Accept request</h3>';
+        //add new notification
+
+        //first select the last ID from db notifications
+        $lastId1 = 0;
+        $sql_sel1 = "SELECT idNotification FROM tbl_notifications";
+        $result_last1 = mysqli_query($conn, $sql_sel1);
+        if(mysqli_num_rows($result_last1) > 0){
+          while($row = mysqli_fetch_assoc($result_last1)){
+            $lastId1 = $row['idNotification'];
+          }
+        }
+
+        $lastId1++;
+        $zero = 0;
+        $typeOf = 'acceptedFrequest';
+        $content = ' accepted your friend request';
+        $sql_notif = "INSERT INTO tbl_notifications (idNotification, idUser, idPost, idUserToSee, typeOf, content, dateOf, isRead) VALUES ('$lastId1','$idFriend','$zero','$idUser','$typeOf',' $content',NOW(),'$zero')";
+        if(mysqli_query($conn,$sql_notif)){
+          echo '<h3>Accept request</h3>';
+        }else{
+          header("Location: ../index.php?error=sqlerror'.$lastId1.'-".mysqli_error($conn));
+          exit();
+        }
       }
 
     }else{

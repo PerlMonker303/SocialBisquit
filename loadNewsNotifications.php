@@ -83,13 +83,14 @@
   }
 
   //checking notifications DB
-  $sql_not = "SELECT * FROM tbl_notifications WHERE idUserToSee = ? LIMIT ?";
+  $zero = 0;
+  $sql_not = "SELECT * FROM tbl_notifications WHERE idUserToSee = ? AND isRead = ? ORDER BY dateOf DESC LIMIT ?";
   $stmt_not = mysqli_stmt_init($conn);
   if(!mysqli_stmt_prepare($stmt_not, $sql_not)){
     header("Location: ../index.php?error=sqlerror");
     exit();
   }else{
-    mysqli_stmt_bind_param($stmt_not, 'ii', $id, $limit);
+    mysqli_stmt_bind_param($stmt_not, 'iii', $id, $zero, $limit);
     mysqli_stmt_execute($stmt_not);
 
     $result_not = mysqli_stmt_get_result($stmt_not);
@@ -114,8 +115,12 @@
       $imagePath = $row_sel_img['nameProfilePic'];
 
       $nothingNew = false;
-      echo '<div id="container-news-inside-article">
-        <h4><img src="Pictures/'.$imagePath.'" name="_newsNotificationClickable" onclick="clickNewsNotification('.$localId.')"></img><i name="_newsNotificationClickable" onclick="clickNewsNotification('.$localId.')">'.$fullName.'</i>'.$row_not['content'].'<span name="_newsNotificationClickable" style="display: none;">'.$row_not['idUser'].'</span></h4>
+      echo '<div id="container-news-inside-article" onclick="markNotificationAsRead('.$row_not['idNotification'].')">
+        <h4>
+          <img src="Pictures/'.$imagePath.'" name="_newsNotificationClickable" onclick="clickNewsNotification('.$localId.')"></img>
+          <i name="_newsNotificationClickable" onclick="clickNewsNotification('.$localId.')">'.$fullName.'</i>'.$row_not['content'].'
+          <span name="_newsNotificationClickable" style="display: none;">'.$row_not['idUser'].'</span>
+        </h4>
 
       </div>';
       $totalNews++;
@@ -124,7 +129,7 @@
   }
 
   if($nothingNew == true){
-    echo '<h3>There are no notifications to be shown.</h3>';
+    echo '<h3>There are no new notifications to be shown.</h3>';
   }else if($totalNews > 2){
     echo '<i>And many more...</i>';
   }

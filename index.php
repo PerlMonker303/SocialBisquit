@@ -144,6 +144,9 @@
         }else if($_GET['error'] == "fileProfilePicSize"){
           echo '<h2 id="container-notification-title">Error</h2>
           <p id="container-notificatiion-content">The picture exceeds the maximum file size.</p>';
+        }else if($_GET['error'] == "fileProfilePicFailedUpload"){
+          echo '<h2 id="container-notification-title">Error</h2>
+          <p id="container-notificatiion-content">The picture has failed to upload to the database.</p>';
         }
         echo '</div>';
       }
@@ -382,10 +385,11 @@
   </div>
 
   <div id="container-news-frame" style="display: none;">
+    <span><i>Click on the notifications to mark them as read</i></span>
     <div id="container-news-inside-frame">
       <span>Loading...</span>
     </div>
-    <button class="formButton" name="_openNotificationPageButton">See more</button>
+    <button class="formButton" name="_openNotificationPageButton">All notifications</button>
   </div>
 </div>
 

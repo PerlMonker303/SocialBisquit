@@ -146,7 +146,7 @@
 	padding-left: 15px;
 	position: relative;
 	top: -20px;
-
+	margin-right: 3em;
 }
 
 #container-form-title>input{
@@ -161,7 +161,7 @@
 	text-align: left;
 	padding-bottom: 10px;
 	font-weight: bold;
-	width: 78%;
+	width: 72%;
 
 }
 
@@ -689,6 +689,64 @@
 	padding-bottom: 4em;
 }
 
+#container-notifications-page{
+	background-color: #d63e34;
+	margin-top: 7em;
+	border-radius: 16px;
+	padding: 2em 1em 0.4em 1em;
+	width: 65%;
+	text-align: center;
+	margin-left: 16%;
+}
+
+#container-notifications-page>h2{
+	text-align: center;
+	color: #fdf7f7;
+}
+
+#container-notifications-page-frame{
+	background-color: #FA8072;
+	border-radius: 8px;
+	margin-bottom: 1em;
+	color: #fdf7f7;
+	position: relative;
+}
+
+#container-notifications-page-frame:nth-child(even){
+	background-color: #F08080;
+}
+
+#container-notifications-page-frame>i{
+	user-select: none;
+}
+
+#container-notifications-page-frame>h4{
+	font-size: 1.1em;
+}
+
+#container-notifications-page-frame>h4>img{
+	width: 3em;
+	height: 3em;
+	border-radius: 8px;
+	vertical-align: middle;
+	margin-right: 0.3em;
+	padding: 0.5em;
+}
+
+#container-notifications-page-frame>h4>span{
+	position: absolute;
+	top: 70%;
+	right: 2em;
+	font-size: 0.85em;
+}
+
+[name="_notificationsOptionsButton"]{
+	position: absolute;
+	top: 5%;
+	right: 0.5em;
+	font-size: 0.4em;
+}
+
 #container-main-page{
 	padding: 2em 0em;
 	display: grid;
@@ -942,10 +1000,14 @@
 	border-bottom-left-radius: 10px;
 	border-bottom-right-radius: 10px;
 	width: 25em;
-	height: 21em;
+	height: 23em;
 	text-align: center;
 	padding: 1em;
 	box-shadow: 9px 10px 25px;
+}
+
+#container-news-frame>span{
+	color: #fdf7f7;
 }
 
 #container-news-inside-frame{
@@ -956,6 +1018,7 @@
 	z-index: 10;
 	width: 96%;
 	border: none;
+	margin-top: 0.75em;
 }
 
 #container-news-inside-article{
@@ -1177,12 +1240,14 @@ textarea[name="_newCommentContent"] {
 	min-height: 3em;
 	width: 100%;
 	resize: vertical;
+	margin-bottom: 1em;
 }
 
 textarea[name="_newShareContent"] {
 	min-height: 3em;
 	width: 100%;
 	resize: vertical;
+	margin-bottom: 1em;
 }
 
 #container-add-comment-buttons{

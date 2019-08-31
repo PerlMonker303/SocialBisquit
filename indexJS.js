@@ -172,7 +172,8 @@ function toggleForm(){
 		}else{
 			isFormOpen = false;
 			x.style.display = "none";
-			contentMargin[0].style.marginTop = "5.5em";
+			if(contentMargin[0])
+				contentMargin[0].style.marginTop = "5.5em";
 		}
 }
 }
@@ -643,13 +644,15 @@ function changeGridColumns(type){
 		if(isOpenedOtherProfile == false){
 			if($(window).width() < 1100){
 				$('#container-profile-other-inside-frame').css("grid-template-columns", "repeat(1, 1fr)");
-			}else{
+			}else if($(window).width() < 1450){
 				$('#container-profile-other-inside-frame').css("grid-template-columns", "repeat(2, 1fr)");
+			}else{
+				$('#container-profile-other-inside-frame').css("grid-template-columns", "repeat(3, 1fr)");
 			}
 		}else if(isOpenedOtherProfile == true){
 			if($(window).width() < 1100){
 				$('#container-profile-other-inside-frame').css("grid-template-columns", "repeat(1, 1fr)");
-			}else if($(window).width() < 1450){
+			}else if($(window).width() < 1625){
 				$('#container-profile-other-inside-frame').css("grid-template-columns", "repeat(2, 1fr)");
 			}else{
 				$('#container-profile-other-inside-frame').css("grid-template-columns", "repeat(3, 1fr)");
@@ -657,12 +660,16 @@ function changeGridColumns(type){
 		}
 	}else{//regular profile
 		if(isFriendsProfilePageOpen == false){
+			//alert('ad');
 			if($(window).width() < 1100){
 				$('#container-profile-inside-frame').css("grid-template-columns", "repeat(1, 1fr)");
-			}else{
+			}else if($(window).width() < 1625){
 				$('#container-profile-inside-frame').css("grid-template-columns", "repeat(2, 1fr)");
+			}else{
+				$('#container-profile-inside-frame').css("grid-template-columns", "repeat(3, 1fr)");
 			}
 		}else if(isFriendsProfilePageOpen == true){
+			//alert('ac');
 			if($(window).width() < 710){
 				$('#container-profile-inside-frame').css("grid-template-columns", "repeat(1, 1fr)");
 			}else if($(window).width() < 1050){
@@ -989,11 +996,8 @@ function toggleProfile(){
 			//select "Posts" options in the menu
 			document.getElementsByName('_profileMenuButton1')[0].style.backgroundColor = "#b3382c";
 			//change layout of posts/shares etc
-			if($(window).width() < 1100){
-		    $('#container-profile-inside-frame').css("grid-template-columns", "repeat(1, 1fr)");
-		  }else{
-		    $('#container-profile-inside-frame').css("grid-template-columns", "repeat(2, 1fr)");
-		  }
+
+			changeGridColumns();
 			//loading initial posts
 			let userId = document.getElementsByName('_loggedUserId')[0].value;
 			isLoadingProfilePages = true;
@@ -1052,6 +1056,7 @@ function toggleNews(){
 				$('[name=_openNotificationPageButton]').click(function(){
 					togglePageNotifications();
 				});
+				//adding clicking event for marking them as read - or on hover
 			}
 		);
 		//open it
@@ -1234,20 +1239,64 @@ function clickNewsNotification(containerId){
 	toggleOtherProfile(document.getElementsByName('_newsNotificationClickable')[containerId*3+2].innerHTML,"_local");
 }
 
+function markNotificationAsRead(idNotif){
+	$.ajax({
+		type: "POST",
+		url: "Includes/markNotificationAsRead.php",
+		data: {
+			_idNotif: idNotif
+		},
+		success: function(){
+			//reload news notifications
+			let userId = document.getElementsByName('_loggedUserId')[0].value;
+			//for loading news notifications
+			$('#container-news-inside-frame').load(
+				"Includes/loadNewsNotifications.php",
+				{
+					_userId: userId
+				}
+			);
+
+			//reload unread counter
+			$('[name=_newNewsCounter]').load(
+				"Includes/loadNewsUnreadCounter.php",
+				{
+					_loggedUserId: document.getElementsByName('_loggedUserId')[0].value
+				}, function(){
+					if(document.getElementsByName('_newNewsCounter')[0].innerHTML == "<span>0</span>"){
+						document.getElementsByName('_newNewsCounter')[0].style.display = "none";
+					}else{
+						document.getElementsByName('_newNewsCounter')[0].style.display = "block";
+					}
+				}
+			);
+		}
+	});
+}
+
 function togglePageNotifications(){
 	//still to implement
 	//make another Script
 	//OR
 	//insert a container into which you'll load the data
-	/*
+
 	let userId = document.getElementsByName('_loggedUserId')[0].value;
 	$('#content').load(
-		"Includes/loadNewsNotifications.php",
+		"Includes/loadNewsNotificationsPage.php",
 		{
 			_userId: userId
 		}, function(){
-			alert('loaded with success!');
+			//change the display of content
+			$('#content').css("display", "block");
+			//toggle notification thingy
+			if(isOpenedNews){
+				toggleNews();
+			}
+			//add click event for delete button
+			$('[name=_notificationsOptionsButton]').click(function(){
+				alert('Delete post - coming soon :)');
+			});
 		}
 	);
-	*/
+
 }

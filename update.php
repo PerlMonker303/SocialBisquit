@@ -31,7 +31,12 @@ if(isset($_POST['update-submit'])){
       if($fileSize < 500000){
         $fileNameNew = uniqid('', true).".".$fileActualExt;
         $fileDestination = '../Pictures/'.$fileNameNew;
-        move_uploaded_file($fileTmpName,$fileDestination);
+        if(move_uploaded_file($fileTmpName,$fileDestination)){
+
+        }else{
+          header("Location: ../index.php?error=fileProfilePicFailedUpload");
+          exit();
+        }
       }else{
         header("Location: ../index.php?error=fileProfilePicSize");
         exit();

@@ -5,19 +5,21 @@
       <h3>The platform where even anti-socials become socialists... I mean social</h3>
       <h1>WHAT is this?</h1>
       <h3>An ad-free social networking/dating platform.</h3>
-      <h1>The aim?</h1>
-      <h3>Bringing people together and offering them an ad-free environment
+      <h1>WHY?</h1>
+      <h3>To bring people together and offer them an ad-free environment
       which holds no boundaries</h3>
-      <h1>What\'s the catch?</h1>
+      <h1>WHAT\'s the catch?</h1>
       <h3>There\'s no catch, seriously.</h3>
       <h4><i>(Trust me)</i></h4>
     </div>
     <div id="main_page_c2">
-      <h2>Latest changes: v0.47 (29.08.19)</h2>
+      <h2>Latest changes: v0.48 (31.08.19)</h2>
         <ul>
-          <li><h4>Improved notification functionality and appearance</h4>
+          <li><h4>Improved notification functionality</h4>
           </li>
-          <li><h4>Adding friends is now working as smooth as sound</h4></li>
+          <li><h4>Added a page where you can see all of your notifications</h4>
+          </li>
+          <li><h4>Fixed some dreary bugs</h4></li>
 
         </ul>
       <h2>Found a <a href="https://www.youtube.com/watch?v=RpHBmm56di8" id="easterEgg2" target="_blank" style="text-decoration:none;color:#fdf7f7;font-style:italic;">pesky</a> bug?</h2>
