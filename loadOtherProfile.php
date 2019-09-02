@@ -18,7 +18,10 @@
         $row_user = mysqli_fetch_assoc($result_user);
         $userFName = $row_user['fName'];
         $userLName = $row_user['lName'];
-        $since = $row_user['dateOfReg'];
+        //$since = $row_user['dateOfReg'];
+        $since = substr($row_user['dateOfReg'], 0, 10);
+        $new_since = date("d-m-Y", strtotime($since));
+        $since = $new_since;
       }
       $sql = "SELECT * FROM tbl_information WHERE idUser=?";
       $stmt = mysqli_stmt_init($conn);
@@ -36,16 +39,22 @@
           ';
           $imagePath = $row['nameProfilePic'];
           $gender = $row['gender'];
+          $genderColorChange = "";
           if($gender == 1){
             $gender = "Male";
+            $genderColorChange = "style=\"color: #4169E1;\"";
           }else{
             $gender = "Female";
+            $genderColorChange = "style=\"color: 	#FF69B4;\"";
           }
           $lookingFor = $row['lookingFor'];
+          $lookingForColorChange = "";
           if($lookingFor == 1){
             $lookingFor = "Male";
+            $lookingForColorChange = "style=\"color: #4169E1;\"";
           }else{
             $lookingFor = "Female";
+            $lookingForColorChange = "style=\"color: 	#FF69B4;\"";
           }
           $dob = strtotime($row['dateOfBirth']);
           $now = time();
@@ -62,7 +71,7 @@
           <div id="container-profile-options-frame">
             <h2>Information</h2>
             <table>
-              <tr><td><span>Gender:</span></td><td>'.$gender.'</td><td><span>Looking for:</span></td><td>'.$lookingFor.'</td></tr>
+              <tr><td><span>Gender:</span></td><td '.$genderColorChange.'>'.$gender.'</td><td><span>Looking for:</span></td><td '.$lookingForColorChange.'>'.$lookingFor.'</td></tr>
               <tr><td><span>Age:</span></td><td>'.$age.'</td><td><span>Member since:</span></td><td>'.$since.'</td></tr>
             </table>
           </div>

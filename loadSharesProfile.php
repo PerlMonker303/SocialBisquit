@@ -65,8 +65,9 @@
         <span style="display: none;" class="share-option-text" onclick="deleteShareOption('.($localId-1).','.$row0['idShare'].')">Delete share</span>
           <h2>'.$row1['title'].'</h2>
           </br>
-          <h3><img src="Pictures/'.$postImage.'"></img> <span>'.$userName.'</span> on <span>'.$row1['datePosted'].'</span></h3>
+          <h3><img src="Pictures/'.$postImage.'"></img> <span>'.$userName.'</span> on <span>'.$row1['datePosted'].'</span>
           <span style="display: none;">'.$postImage.'</span>
+          </h3>
           </div>';
       $localId++;
       echo '

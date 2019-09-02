@@ -13,14 +13,12 @@
       <h4><i>(Trust me)</i></h4>
     </div>
     <div id="main_page_c2">
-      <h2>Latest changes: v0.48 (31.08.19)</h2>
+      <h2>Latest changes: v0.51 (02.09.19)</h2>
         <ul>
-          <li><h4>Improved notification functionality</h4>
+          <li><h4>Started implementing the settings area for your account/profile</h4>
           </li>
-          <li><h4>Added a page where you can see all of your notifications</h4>
-          </li>
-          <li><h4>Fixed some dreary bugs</h4></li>
-
+          <li><h4>Added bio customization on profile page</h4></li>
+          <li><h4>*It is advisable not to update your account from a phone - use a computer instead :)</h4></li>
         </ul>
       <h2>Found a <a href="https://www.youtube.com/watch?v=RpHBmm56di8" id="easterEgg2" target="_blank" style="text-decoration:none;color:#fdf7f7;font-style:italic;">pesky</a> bug?</h2>
       <h4>Tell me about it.</h4>

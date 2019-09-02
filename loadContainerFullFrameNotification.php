@@ -1,8 +1,56 @@
 <?php
   require 'dbh.php';
 
-  $userId = $_POST['_userId'];
-  $postId = $_POST['_postId'];
+  $postId = $_POST['_idPost'];
+  $userId = "";
+
+  $articleTitle = "";
+  $imagePath = "";
+  $authorName = "";
+  $datePublished = "";
+  $content = "";
+  $likeCount = "";
+  $commentCount = "";
+  $shareCount = "";
+
+  //post
+  $sql_sel1 = "SELECT * FROM tbl_posts WHERE idPost = '$postId'";
+  $result_sel1 = mysqli_query($conn, $sql_sel1);
+  if($result_sel1){
+    $row1 = mysqli_fetch_assoc($result_sel1);
+    $articleTitle = $row1['title'];
+    $userId = $row1['idUser'];
+    $datePublished = $row1['datePosted'];
+    $newDate = date('d-m-Y', strtotime($datePublished));
+    $content = $row1['content'];
+
+    //users
+    $sql_sel2 = "SELECT * FROM tbl_users WHERE idUser = '$userId'";
+    $result_sel2 = mysqli_query($conn, $sql_sel2);
+    if($result_sel2){
+      $row2 = mysqli_fetch_assoc($result_sel2);
+      $authorName = $row2['fName'].' '.$row2['lName'];
+
+      //information
+      $sql_sel3 = "SELECT * FROM tbl_information WHERE idUser = '$userId'";
+      $result_sel3 = mysqli_query($conn, $sql_sel3);
+      if($result_sel3){
+        $row3 = mysqli_fetch_assoc($result_sel3);
+        $imagePath = $row3['nameProfilePic'];
+
+
+      }else{
+        header("Location: ../index.php?error=sqlerror".mysqli_error($conn));
+        exit();
+      }
+    }else{
+      header("Location: ../index.php?error=sqlerror".mysqli_error($conn));
+      exit();
+    }
+  }else{
+    header("Location: ../index.php?error=sqlerror".mysqli_error($conn));
+    exit();
+  }
 
   echo '
 
@@ -10,11 +58,11 @@
       <button class="formButton" onclick="toggleFullContainer()">Close</button>
     </div>
     <div id="container-full-header-content">
-      <h1>Article title</h1>
+      <h1>'.$articleTitle.'</h1>
       <h3>By</h3>
-      <img src="" onclick="openAProfile('.$userId.')"></img>
-      <h3 onclick="openAProfile('.$userId.')">Author title</h3>
-      <h4>Published on -date-</h4>
+      <img src="Pictures/'.$imagePath.'" onclick="openAProfile('.$userId.')"></img>
+      <h3 onclick="openAProfile('.$userId.')">'.$authorName.'</h3>
+      <h4>Published on '.$newDate.'</h4>
       <span name="_authorOfPost" style="display: none;">'.$userId.'</span>
     </div>
     <div id="container-full-header-bar">
@@ -26,9 +74,9 @@
       <span name="_shareCount"></span>
     </div>
     <div id="container-full-text-content">
-      <p> Article content
+      <p> '.$content.'
       </p>
-      <p style="display: none;"></p>
+      <p style="display: none;">'.$postId.'</p>
     </div>
 
     <div id="container-liked-list">
@@ -85,9 +133,11 @@
     <h2>Comments (<span name="_commentCount"></span>)</h2>
     <div id="container-full-comment-section" >
 
-        <span name="secret-post-id">.$global_post_id.</span>
+        <span name="secret-post-id">'.$postId.'</span>
 
     </div>
 
   ';
-?>
+
+  //you want to load the full container based on notification information
+ ?>

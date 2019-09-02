@@ -7,35 +7,46 @@ var isSetupProfilePageOpened = false;
 function changeSelectedButton(buttonIndex){
   switch(buttonIndex){
     case 0:
-    document.getElementsByName('_profileMenuButton1')[0].style.backgroundColor = "#d63e34";
-    document.getElementsByName('_profileMenuButton2')[0].style.backgroundColor = "#d63e34";
-    document.getElementsByName('_profileMenuButton3')[0].style.backgroundColor = "#d63e34";
-    document.getElementsByName('_profileMenuButton4')[0].style.backgroundColor = "#d63e34";
+      document.getElementsByName('_profileMenuButton1')[0].style.backgroundColor = "#d63e34";
+      document.getElementsByName('_profileMenuButton2')[0].style.backgroundColor = "#d63e34";
+      document.getElementsByName('_profileMenuButton3')[0].style.backgroundColor = "#d63e34";
+      document.getElementsByName('_profileMenuButton4')[0].style.backgroundColor = "#d63e34";
+      document.getElementsByName('_profileMenuButton5')[0].style.backgroundColor = "#d63e34";
       break;
     case 1:
       document.getElementsByName('_profileMenuButton1')[0].style.backgroundColor = "#b3382c";
       document.getElementsByName('_profileMenuButton2')[0].style.backgroundColor = "#d63e34";
       document.getElementsByName('_profileMenuButton3')[0].style.backgroundColor = "#d63e34";
       document.getElementsByName('_profileMenuButton4')[0].style.backgroundColor = "#d63e34";
+      document.getElementsByName('_profileMenuButton5')[0].style.backgroundColor = "#d63e34";
       break;
     case 2:
       document.getElementsByName('_profileMenuButton1')[0].style.backgroundColor = "#d63e34";
       document.getElementsByName('_profileMenuButton2')[0].style.backgroundColor = "#b3382c";
       document.getElementsByName('_profileMenuButton3')[0].style.backgroundColor = "#d63e34";
       document.getElementsByName('_profileMenuButton4')[0].style.backgroundColor = "#d63e34";
+      document.getElementsByName('_profileMenuButton5')[0].style.backgroundColor = "#d63e34";
       break;
     case 3:
       document.getElementsByName('_profileMenuButton1')[0].style.backgroundColor = "#d63e34";
       document.getElementsByName('_profileMenuButton2')[0].style.backgroundColor = "#d63e34";
       document.getElementsByName('_profileMenuButton3')[0].style.backgroundColor = "#b3382c";
       document.getElementsByName('_profileMenuButton4')[0].style.backgroundColor = "#d63e34";
+      document.getElementsByName('_profileMenuButton5')[0].style.backgroundColor = "#d63e34";
       break;
     case 4:
       document.getElementsByName('_profileMenuButton1')[0].style.backgroundColor = "#d63e34";
       document.getElementsByName('_profileMenuButton2')[0].style.backgroundColor = "#d63e34";
       document.getElementsByName('_profileMenuButton3')[0].style.backgroundColor = "#d63e34";
       document.getElementsByName('_profileMenuButton4')[0].style.backgroundColor = "#b3382c";
+      document.getElementsByName('_profileMenuButton5')[0].style.backgroundColor = "#d63e34";
       break;
+    case 5:
+      document.getElementsByName('_profileMenuButton1')[0].style.backgroundColor = "#d63e34";
+      document.getElementsByName('_profileMenuButton2')[0].style.backgroundColor = "#d63e34";
+      document.getElementsByName('_profileMenuButton3')[0].style.backgroundColor = "#d63e34";
+      document.getElementsByName('_profileMenuButton4')[0].style.backgroundColor = "#d63e34";
+      document.getElementsByName('_profileMenuButton5')[0].style.backgroundColor = "#b3382c";
     default:
       break;
   }
@@ -69,7 +80,6 @@ function changeSelectedButtonOther(buttonIndex){
 }
 
 var isLoadingProfilePages = false;
-var isFriendsProfilePageOpen = false;
 
 //for loading profile options header data
 function loadProfileOptionsHeaderData(){
@@ -97,6 +107,7 @@ function loadProfileOptionsHeaderData(){
 }
 
 var loggedUserId = 0;
+var isFriendsProfilePageOpen = false;
 
 $(document).ready(function(){
   if(document.getElementById('_secretUserId'))
@@ -122,6 +133,7 @@ $(document).ready(function(){
             isLoadingProfilePages = false;
             isSetupProfilePageOpened = false;
             $('#container-profile-inside-frame').css("display", "grid");
+            $('#container-profile-inside-frame').css("height", "auto");
             changeGridColumns();
           }
         );
@@ -144,6 +156,7 @@ $(document).ready(function(){
             isLoadingProfilePages = false;
             isSetupProfilePageOpened = false;
             $('#container-profile-inside-frame').css("display", "grid");
+            $('#container-profile-inside-frame').css("height", "auto");
             changeGridColumns();
             //for clicking options button on post
           	$('#share-option-button').click(function()
@@ -170,6 +183,7 @@ $(document).ready(function(){
             isLoadingProfilePages = false;
             isSetupProfilePageOpened = false;
             $('#container-profile-inside-frame').css("display", "grid");
+            $('#container-profile-inside-frame').css("height", "auto");
             changeGridColumns();
           }
         );
@@ -189,14 +203,17 @@ $(document).ready(function(){
           },function(){//success function
             isLoadingProfilePages = false;
             isSetupProfilePageOpened = false;
-            $('#container-profile-inside-frame').css("display", "grid");
+            $('#container-profile-inside-frame').css("display", "block");
+            $('#container-profile-inside-frame').css("height", "auto");
             changeGridColumns();
             //delete this when adding messages!!!
-            $('#container-profile-inside-frame').css("grid-template-columns", "repeat(1, 1fr)");
+            //$('#container-profile-inside-frame').css("grid-template-columns", "repeat(1, 1fr)");
           }
         );
         }
       });
+
+    $('[name=_profileMenuButton5]').click(selectSettingsMenu);
 
   //for showing setupProfileForm
   let userId = document.getElementsByName('_loggedUserId')[0].value;
@@ -264,6 +281,45 @@ $(document).ready(function(){
   }
 });
 
+//function for settings menu - I made it separately because this menu is opened by two triggers
+function selectSettingsMenu(){
+
+  if(isLoadingProfilePages == false){
+    isLoadingProfilePages = true;
+    isFriendsProfilePageOpen = false;
+    changeSelectedButton(5);
+    document.getElementById('container-profile-inside-frame').innerHTML = "Loading content...";
+    $('#container-profile-inside-frame').load(
+      "Includes/loadProfileSettingsPage.php",
+      {
+        _userId: document.getElementsByName('_loggedUserId')[0].value
+      },function(){
+        //success function
+        //do the same as above
+        isLoadingProfilePages = false;
+        isSetupProfilePageOpened = false;
+        $('#container-profile-inside-frame').css("display", "block");
+        $('#container-profile-inside-frame').css("height", "200px");
+        //load first selected settings page
+        $('#settings-main-inner-pane').load(
+          'Includes/loadProfileSettings1.php'
+        );
+        //load events for menu options
+        $('[name=_settingsMenuOption1]').click(function(){
+          $('#settings-main-inner-pane').load(
+            'Includes/loadProfileSettings1.php'
+          );
+        });
+        $('[name=_settingsMenuOption2]').click(function(){
+          $('#settings-main-inner-pane').load(
+            'Includes/loadProfileSettings2.php'
+          );
+        });
+      }
+    );
+  }
+}
+
 let otherUserId = 0;
 
 function openAProfile(userId){
@@ -319,7 +375,7 @@ function toggleOtherProfile(contId, from){
           "Includes/checkUserAdded.php",
           {
             _userId: otherUserId,
-            _loggedUserId: loggedUserId
+            _loggedUserId: document.getElementsByName('_loggedUserId')[0].value
           }
         );
       }
@@ -381,7 +437,7 @@ function toggleOtherProfile(contId, from){
             "Includes/checkUserAdded.php",
             {
               _userId: otherUserId,
-              _loggedUserId: loggedUserId
+              _loggedUserId: document.getElementsByName('_loggedUserId')[0].value
             }
           );
         }
@@ -520,7 +576,7 @@ function toggleFriend(){
   $('[name=_otherprofileMenuButton4]').load(
     url,
     {
-      _userId: loggedUserId,
+      _userId: document.getElementsByName('_loggedUserId')[0].value,
       _friendId: otherUserId
     }, function(){
       if(text == "Request sent")

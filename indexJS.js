@@ -2,19 +2,6 @@ var basicContainer=0;
 var nextNumber = 3;
 var isOpenedOptionsDropdown = false;
 
-//toggle option button in profile
-function toggleOptionButton(){
-	if(isOpenedOptionsDropdown == false){
-		let x = document.getElementById('container-profile-options-dropdown');
-		x.style.display = "block";
-		isOpenedOptionsDropdown = true;
-	}else{
-		let x = document.getElementById('container-profile-options-dropdown');
-		x.style.display = "none";
-		isOpenedOptionsDropdown = false;
-	}
-}
-
 window.onload = loadFunction;
 function loadFunction(){
 	//loading containers
@@ -29,8 +16,7 @@ function loadFunction(){
 	}
 
 	//for activating profile-options-dropdown list
-	$("[name='profile-option-button']").click(toggleOptionButton);
-
+	$("[name='profile-option-button']").click(selectSettingsMenu);
 }
 
 var today;
@@ -45,7 +31,7 @@ function getDate(){
 }
 
 function reloadPage(){
-	if(isFullContainerOpen == false && isOpenedProfile == false){
+	if(isFullContainerOpen == false && isOpenedProfile == false && isOpenedOtherProfile == false){
 		//window.location.reload();
 		window.location = "index.php";
 	}
@@ -207,7 +193,7 @@ function checkLikedCurrentUser(){
 	//checking
 	let x = document.getElementById('container-full-text-content');
 	let postId = x.getElementsByTagName('p')[1].innerHTML;
-	let userId = document.getElementsByName('_loggedUserId')[0].value
+	let userId = document.getElementsByName('_loggedUserId')[0].value;
 	$('[name=_checkCurrentUserLoggedOuter]').load(
 		"Includes/checkLikeCurrentUser.php",
 		{
@@ -221,7 +207,6 @@ function checkLikedCurrentUser(){
 function updateLikeCount(){
 	let x = document.getElementById('container-full-text-content');
 	let postId = x.getElementsByTagName('p')[1].innerHTML;
-
 	$('[name=_likeCount]').load(
 		"Includes/updateLikeCount.php",
 		{
@@ -378,6 +363,7 @@ $(document).ready(function(){
 			{
 				_userId: userId
 			},function(){
+				isOpenedNotificationsPage = false;
 				//for clicking on the overlay
 				$('#overlay').click(function(){
 					if(isOpenedProfile == true){
@@ -395,6 +381,14 @@ $(document).ready(function(){
 				});
 				//showing help button
 				document.getElementById('container-help-button').style.display = "block";
+				//updating last accessed
+				$.ajax({
+					type: "POST",
+					url: "Includes/updateLastAccessed.php",
+					data: {
+						_userId: userId
+					}
+				});
 			}
 		);
 
@@ -409,6 +403,7 @@ $(document).ready(function(){
 		$('#container-main-page').load(
 			"Includes/loadMainPage.php", function(){
 				$('#content').css("display", "block");
+				$('#content').css("grid-template-columns", "");
 				//loading live stats
 				$('#main_page_c4').load(
 					"Includes/loadLiveStats.php"
@@ -438,7 +433,6 @@ $(document).ready(function(){
 				commentPostId: commentPostId
 			}
 		);
-		//loadComments();
 	});
 
 
@@ -526,6 +520,21 @@ $(document).ready(function(){
 							updateCommentCount();
 							//showing success message
 							showSuccessMessage("comment");
+							//loading news unread counter
+							$('[name=_newNewsCounter]').load(
+								"Includes/loadNewsUnreadCounter.php",
+								{
+									_loggedUserId: document.getElementsByName('_loggedUserId')[0].value
+								}, function(){
+									if(document.getElementsByName('_newNewsCounter')[0].innerHTML == "<span>0</span>"){
+										document.getElementsByName('_newNewsCounter')[0].style.display = "none";
+									}else{
+										document.getElementsByName('_newNewsCounter')[0].style.display = "block";
+									}
+								}
+							);
+							//delete notifications in excess
+							deleteNotificationExcess(document.getElementsByName('_authorOfPost')[0].innerHTML);
 						}
 					});
 
@@ -565,6 +574,22 @@ $(document).ready(function(){
 						}
 						//showing success message
 						showSuccessMessage("like");
+						//update notification unread
+						//loading news unread counter
+						$('[name=_newNewsCounter]').load(
+							"Includes/loadNewsUnreadCounter.php",
+							{
+								_loggedUserId: document.getElementsByName('_loggedUserId')[0].value
+							}, function(){
+								if(document.getElementsByName('_newNewsCounter')[0].innerHTML == "<span>0</span>"){
+									document.getElementsByName('_newNewsCounter')[0].style.display = "none";
+								}else{
+									document.getElementsByName('_newNewsCounter')[0].style.display = "block";
+								}
+							}
+						);
+						//delete notifications in excess
+						deleteNotificationExcess(document.getElementsByName('_authorOfPost')[0].innerHTML);
 					}
 				});
 			});
@@ -595,6 +620,21 @@ $(document).ready(function(){
 						updateShareCount();
 						//showing success message
 						showSuccessMessage("share");
+						//loading news unread counter
+						$('[name=_newNewsCounter]').load(
+							"Includes/loadNewsUnreadCounter.php",
+							{
+								_loggedUserId: document.getElementsByName('_loggedUserId')[0].value
+							}, function(){
+								if(document.getElementsByName('_newNewsCounter')[0].innerHTML == "<span>0</span>"){
+									document.getElementsByName('_newNewsCounter')[0].style.display = "none";
+								}else{
+									document.getElementsByName('_newNewsCounter')[0].style.display = "block";
+								}
+							}
+						);
+						//delete notifications in excess
+						deleteNotificationExcess(document.getElementsByName('_authorOfPost')[0].innerHTML);
 					}
 				});
 			});
@@ -741,7 +781,12 @@ function toggleFullContainer(contId){
 			toggleAddComment();
 		if(isOpenedAddShare == true)
 			toggleAddShare();
+		if(wasFullContainerLoadedFromNotificationPage)
+			wasFullContainerLoadedFromNotificationPage = false;
 	}else{
+		if(isOpenedNews){
+			toggleNews();
+		}
 		//for opened profile
 		if(isOpenedProfile == true){
 			//select it from somewhere elese
@@ -750,9 +795,6 @@ function toggleFullContainer(contId){
 			//do it naturally
 			loadedFromOtherProfile = 1;
 			hideOtherProfile();
-		}
-		if(isOpenedNews){
-			toggleNews();
 		}
 		//limiting adding-comment number of characters
 		document.getElementsByName('_newCommentContent')[0].maxLength = "300";
@@ -789,6 +831,8 @@ function toggleFullContainer(contId){
 		x.getElementsByTagName('p')[1].innerHTML = postId;
 		document.getElementById('container-full-comment-section').getElementsByTagName('span')[0].innerHTML = postId;
 
+
+
 		//showing it
 		let fullContainer = document.getElementById('container-full-frame');
 		fullContainer.style.display = "block";
@@ -821,7 +865,7 @@ function toggleFullContainer(contId){
 
 		//scrolling to top
 		//document.body.scrollTop = 0; // For Safari
-  	//document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+		//document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
 	}
 }
 
@@ -966,7 +1010,27 @@ function changeTopBannerRight(isLoggedIn){
 	}
 }
 
+//function for canceling updating bio - used twice so it needs to be sepparate to avoid repetition
+var originalBio = "";
+function cancelBioParagraphProfileFunction(){
+	//change textarea into p
+	let bioTextArea = document.getElementsByName('_bioTextAreaProfile')[0];
+	let bioParagraph = document.createElement('p');
+	bioParagraph.innerHTML = originalBio;
+	bioParagraph.setAttribute("name", "_bioParagraphProfile");
+	bioTextArea.parentNode.replaceChild(bioParagraph, bioTextArea);
+
+	//change buttons
+	let btnUpdate = document.getElementsByName('_editBioParagraphProfile')[0];
+	btnUpdate.innerHTML = "Edit";
+	let btnCancel = document.getElementsByName('_cancelBioParagraphProfile')[0];
+	//document.getElementById('container-profile-header').parentNode.removeChild(btnCancel);
+	$('#container-profile-header').children().last().remove();
+	isOpenedBioEditMode = false;
+}
+
 var isOpenedProfile = false;
+var isOpenedBioEditMode = false;
 
 function toggleProfile(){
 	//for hiding success message for adding friends
@@ -1009,8 +1073,63 @@ function toggleProfile(){
 					isLoadingProfilePages = false;
 				}
 		  );
-		}else{
 
+			//add event for edit bio button
+			$('[name=_editBioParagraphProfile]').click(function(){
+				if(isOpenedBioEditMode == false){
+					isOpenedBioEditMode = true;
+					//change p into textarea
+					let bioParagraph = document.getElementsByName('_bioParagraphProfile')[0];
+					let bioTextArea = document.createElement('textarea');
+					originalBio = bioParagraph.innerHTML;
+					bioTextArea.value = bioParagraph.innerHTML;
+					bioTextArea.setAttribute("name", "_bioTextAreaProfile");
+					bioParagraph.parentNode.replaceChild(bioTextArea, bioParagraph);
+
+					//change button
+					let btnEdit = document.getElementsByName('_editBioParagraphProfile')[0];
+					btnEdit.innerHTML = "Update";
+					let btnCancel = document.createElement('button');
+					btnCancel.setAttribute("class", "formButton");
+					btnCancel.setAttribute("name", "_cancelBioParagraphProfile");
+					btnCancel.innerHTML = "Cancel";
+					document.getElementById('container-profile-header').appendChild(btnCancel);
+					$('[name=_cancelBioParagraphProfile]').click(cancelBioParagraphProfileFunction);
+
+
+				}else{
+					//change textarea into p
+					let bioTextArea = document.getElementsByName('_bioTextAreaProfile')[0];
+					let bioParagraph = document.createElement('p');
+					bioParagraph.innerHTML = bioTextArea.value;
+					bioParagraph.setAttribute("name", "_bioParagraphProfile");
+					bioTextArea.parentNode.replaceChild(bioParagraph, bioTextArea);
+
+					//change buttons
+					let btnUpdate = document.getElementsByName('_editBioParagraphProfile')[0];
+					btnUpdate.innerHTML = "Edit";
+					let btnCancel = document.getElementsByName('_cancelBioParagraphProfile')[0];
+					//document.getElementById('container-profile-header').parentNode.removeChild(btnCancel);
+					$('#container-profile-header').children().last().remove();
+					//insert into DB
+					$.ajax({
+						type: "POST",
+						url: "Includes/updateBio.php",
+						data: {
+							_userId: document.getElementsByName('_loggedUserId')[0].value,
+							_bio: bioParagraph.innerHTML
+						},
+						success: function(){
+							//success
+						}
+					});
+
+					isOpenedBioEditMode = false;
+				}
+			});
+		}else{
+			$('#container-profile-inside-frame').css("display", "grid");
+			$('#container-profile-inside-frame').css("height", "auto");
 			isFriendsProfilePageOpen = false;
 			isOpenedProfile = false;
 			profileContainer.style.display = "none";
@@ -1055,6 +1174,7 @@ function toggleNews(){
 				//add clicking event for see more button
 				$('[name=_openNotificationPageButton]').click(function(){
 					togglePageNotifications();
+
 				});
 				//adding clicking event for marking them as read - or on hover
 			}
@@ -1135,6 +1255,7 @@ function toggleAddComment(){
 		document.getElementsByName('_newShareSuccess')[0].style.display = "none";
 	}else{
 		document.getElementById('container-add-comment').style.display = "none";
+		document.getElementById('container-add-comment').getElementsByTagName('textarea')[0].value = "";
 		isOpenedAddComment = false;
 	}
 }
@@ -1153,6 +1274,7 @@ function toggleAddShare(){
 		document.getElementsByName('_newShareSuccess')[0].style.display = "none";
 	}else{
 		document.getElementById('container-add-share').style.display = "none";
+		document.getElementById('container-add-share').getElementsByTagName('textarea')[0].value = "";
 		isOpenedAddShare = false;
 	}
 }
@@ -1167,7 +1289,7 @@ function resetShare(){
 	toggleAddShare();
 }
 
-function acceptFriendRequest(idReq){
+function acceptFriendRequest(idReq, localId){
 	$.ajax({
 		type: "POST",
 		url: "Includes/acceptFrequestFromNews.php",
@@ -1196,13 +1318,29 @@ function acceptFriendRequest(idReq){
 							}
 						}
 					);
+					//show success message
+					let successMessage = document.getElementsByName('_newsNotificationSuccessMessage')[0];
+					successMessage.innerHTML = "Request accepted succesfully.";
+					successMessage.style.display = "block";
+					//enlarge frame and bring them back
+					$('#container-news-frame').css("height", "448px");
+				  setTimeout(function(){$(successMessage).fadeOut(1000, function(){
+						$('#container-news-frame').css("height", "384px");
+					});},2000);
 				}
 			);
+			//load animation to announce that everything was fine
+			if(isOpenedNotificationsPage){
+				//hide that container
+				const elements = document.getElementsByClassName('container-notifications-page-frame-freq');
+				elements[localId].remove();
+				togglePageNotifications('accept-frequest');
+			}
 		}
 	});
 }
 
-function rejectFriendRequest(idReq){
+function rejectFriendRequest(idReq, localId){
 	$.ajax({
 		type: "POST",
 		url: "Includes/deleteFriendRequestFromNews.php",
@@ -1231,6 +1369,22 @@ function rejectFriendRequest(idReq){
 					}
 				}
 			);
+			//load animation to announce that everything was fine
+			if(isOpenedNotificationsPage){
+				//hide that container
+				const elements = document.getElementsByClassName('container-notifications-page-frame-freq');
+				elements[localId].remove();
+				togglePageNotifications('reject-frequest');
+			}
+			//show success message
+			let successMessage = document.getElementsByName('_newsNotificationSuccessMessage')[0];
+			successMessage.innerHTML = "Request rejected succesfully.";
+			successMessage.style.display = "block";
+			//enlarge frame and bring them back
+			$('#container-news-frame').css("height", "448px");
+			setTimeout(function(){$(successMessage).fadeOut(1000, function(){
+				$('#container-news-frame').css("height", "384px");
+			});},2000);
 		}
 	});
 }
@@ -1239,7 +1393,232 @@ function clickNewsNotification(containerId){
 	toggleOtherProfile(document.getElementsByName('_newsNotificationClickable')[containerId*3+2].innerHTML,"_local");
 }
 
+function clickNewsNotificationPost(idPost){
+	wasFullContainerLoadedFromNotificationPage = true;
+	//make new function
+	$('#container-full-frame').load(
+		'Includes/loadContainerFullFrameNotification.php',
+		{
+			_idPost: idPost
+		}, function(){
+			//hiding news notifications
+			if(isOpenedNews)
+				toggleNews();
+
+			//adding a comment panel
+			$('[name=container-full-bar-content-comment]').click(toggleAddComment);
+			$('[name=container-full-bar-content-share]').click(toggleAddShare);
+
+			//for posting comments
+			$('[name=post-comment]').click(function(e){
+				e.preventDefault();
+				let x = document.getElementsByName('_newCommentContent')[0].value;
+				if(x){
+					var commentPostId = document.getElementById('container-full-text-content').getElementsByTagName('p')[1].innerHTML;
+					var commentUserId = document.getElementsByName('_loggedUserId')[0].value;
+					var commentContent = x;
+					var commentParent = document.getElementById('container-full-text-content').getElementsByTagName('p')[1].innerHTML;
+
+					let url = "Includes/comment.php";
+
+					var concatenatedData = 'pId='+commentPostId+'&pUid='+commentUserId+'&pCnt='+commentContent+'&pPrn='+commentParent;
+					console.log(concatenatedData);
+					$.ajax({
+						type: "POST",
+						url: url,
+						data: {
+							_commentPostId: commentPostId,
+							_commentUserId: commentUserId,
+							_commentContent: commentContent,
+							_commentParent: commentParent
+						},
+						success: function(){
+							resetComment();
+							//loading comments
+							commentCount = 1000;
+							loadComments();
+							//updating comment count
+							updateCommentCount();
+							//showing success message
+							showSuccessMessage("comment");
+							//loading news unread counter
+							$('[name=_newNewsCounter]').load(
+								"Includes/loadNewsUnreadCounter.php",
+								{
+									_loggedUserId: document.getElementsByName('_loggedUserId')[0].value
+								}, function(){
+									if(document.getElementsByName('_newNewsCounter')[0].innerHTML == "<span>0</span>"){
+										document.getElementsByName('_newNewsCounter')[0].style.display = "none";
+									}else{
+										document.getElementsByName('_newNewsCounter')[0].style.display = "block";
+									}
+								}
+							);
+							//delete notifications in excess
+							deleteNotificationExcess(document.getElementsByName('_authorOfPost')[0].innerHTML);
+						}
+					});
+
+				}else{
+					//showing error message
+					document.getElementsByName('_newCommentError')[0].style.display = "block";
+				}
+			});
+
+			//for liking posts
+			$('[name=container-full-bar-content-like]').click(function(){
+				let x = document.getElementById('container-full-text-content');
+				let postId = x.getElementsByTagName('p')[1].innerHTML;
+				let userId = document.getElementsByName('_loggedUserId')[0].value;
+				let url = "Includes/like.php";
+				$.ajax({
+					type: "POST",
+					url: url,
+					data: {
+						_postId: postId,
+						_userId: userId
+					},
+					success: function(){
+						//updating like count
+						updateLikeCount();
+						//changing like text
+						checkLikedCurrentUser();
+						//modifying stuff
+						//!failure at turning the text in italics when current post is "Liked"
+						let local_text = document.getElementsByName('_checkCurrentUserLogged')[0].innerHTML;
+						if(local_text == "Like"){
+							//document.getElementsByName('_checkCurrentUserLoggedOuter')[0].getElementsByTagName('h4')[0].style.fontStyle = "italic";
+							document.getElementsByName('_newLikeSuccess')[0].innerHTML = "Post liked succesfully.";
+						}else if(local_text == "Liked"){
+							//document.getElementsByName('_checkCurrentUserLoggedOuter')[0].getElementsByTagName('h4')[0].style.fontStyle = "normal";
+							document.getElementsByName('_newLikeSuccess')[0].innerHTML = "You no longer like this post.";
+						}
+						//showing success message
+						showSuccessMessage("like");
+						//update notification unread
+						//loading news unread counter
+						$('[name=_newNewsCounter]').load(
+							"Includes/loadNewsUnreadCounter.php",
+							{
+								_loggedUserId: document.getElementsByName('_loggedUserId')[0].value
+							}, function(){
+								if(document.getElementsByName('_newNewsCounter')[0].innerHTML == "<span>0</span>"){
+									document.getElementsByName('_newNewsCounter')[0].style.display = "none";
+								}else{
+									document.getElementsByName('_newNewsCounter')[0].style.display = "block";
+								}
+							}
+						);
+						//delete notifications in excess
+						deleteNotificationExcess(document.getElementsByName('_authorOfPost')[0].innerHTML);
+					}
+				});
+			});
+
+			//for sharing posts
+			$('[name=post-share]').click(function(e){
+				e.preventDefault();
+				let x = document.getElementById('container-full-text-content');
+				let postId = x.getElementsByTagName('p')[1].innerHTML;
+				let userId = document.getElementsByName('_loggedUserId')[0].value;
+				let shareContent = document.getElementsByName('_newShareContent')[0].value;
+				let url = "Includes/share.php";
+				if(shareContent == "")
+					shareCount = "empty";
+				console.log(postId);
+				$.ajax({
+					type: "POST",
+					url: url,
+					data: {
+						_postId: postId,
+						_userId: userId,
+						_shareContent: shareContent
+					},
+					success: function(){
+						//reset share
+						resetShare();
+						//update share count
+						updateShareCount();
+						//showing success message
+						showSuccessMessage("share");
+						//loading news unread counter
+						$('[name=_newNewsCounter]').load(
+							"Includes/loadNewsUnreadCounter.php",
+							{
+								_loggedUserId: document.getElementsByName('_loggedUserId')[0].value
+							}, function(){
+								if(document.getElementsByName('_newNewsCounter')[0].innerHTML == "<span>0</span>"){
+									document.getElementsByName('_newNewsCounter')[0].style.display = "none";
+								}else{
+									document.getElementsByName('_newNewsCounter')[0].style.display = "block";
+								}
+							}
+						);
+						//delete notifications in excess
+						deleteNotificationExcess(document.getElementsByName('_authorOfPost')[0].innerHTML);
+					}
+				});
+			});
+
+			//for toggling likedList
+			$('._likedList').hover(function(e){
+				document.getElementById('container-liked-list').style.display = "block";
+				$('._likedList').mousemove(function(e){
+					//loading data
+					let x = document.getElementById('container-full-text-content');
+					let postId = x.getElementsByTagName('p')[1].innerHTML;
+					$('#container-liked-list').load("Includes/loadLikedList.php",{
+						_postId: postId
+					});
+					//calling function to show the container on mouse position
+					hoverDiv(e);
+				});
+			});
+
+			$('._likedList').mouseleave(function(e){
+				document.getElementById('container-liked-list').style.display = "none";
+			});
+
+			//showing it
+			let fullContainer = document.getElementById('container-full-frame');
+			fullContainer.style.display = "block";
+			//changeBodyOpacity(true);
+			isFullContainerOpen = true;
+			if(isOpenedProfile == true || isOpenedOtherProfile == true){
+				isOpenedOverlay = false;
+			}
+
+			toggleOverlay('fullContainer');
+			//loading Comments
+			commentCount=0;
+			loadComments();
+
+			//load likes and shares count
+			updateLikeCount();
+			updateCommentCount();
+			updateShareCount();
+
+			//check if comment has been liked by current user
+			checkLikedCurrentUser();
+
+			//deleting success messages
+			document.getElementsByName('_newLikeSuccess')[0].style.display = "none";
+			document.getElementsByName('_newCommentSuccess')[0].style.display = "none";
+			document.getElementsByName('_newShareSuccess')[0].style.display = "none";
+
+			//location the full container at the top of the screen
+			let topOffset = 85;
+			fullContainer.style.top = $(window).scrollTop()+topOffset;
+		}
+	);
+}
+
+var wasFullContainerLoadedFromNotificationPage = false;
+
 function markNotificationAsRead(idNotif){
+	if(wasFullContainerLoadedFromNotificationPage == true){
+		alert('asd');
+	}
 	$.ajax({
 		type: "POST",
 		url: "Includes/markNotificationAsRead.php",
@@ -1270,33 +1649,92 @@ function markNotificationAsRead(idNotif){
 					}
 				}
 			);
+
+			//if notification page is opened, reload it
+			if(isOpenedNotificationsPage == true){
+				togglePageNotifications();
+				//toggling overlay
+				//toggleOverlay('fullContainer');
+			}
+
+
 		}
 	});
 }
 
-function togglePageNotifications(){
-	//still to implement
-	//make another Script
-	//OR
-	//insert a container into which you'll load the data
+isOpenedNotificationsPage = false;
 
+function togglePageNotifications(typeOf){
 	let userId = document.getElementsByName('_loggedUserId')[0].value;
 	$('#content').load(
 		"Includes/loadNewsNotificationsPage.php",
 		{
 			_userId: userId
 		}, function(){
+			isOpenedNotificationsPage = true;
 			//change the display of content
 			$('#content').css("display", "block");
+			document.getElementById('container-help-button').style.display = "none";
 			//toggle notification thingy
 			if(isOpenedNews){
 				toggleNews();
 			}
-			//add click event for delete button
-			$('[name=_notificationsOptionsButton]').click(function(){
-				alert('Delete post - coming soon :)');
-			});
+			//for accepting/rejecting frequests or deleteing notifications MESSAGES
+			if(document.getElementsByName('_successFriendRequestFromNotifications')[0]){
+				let successMessage;
+				successMessage = document.getElementsByName('_successFriendRequestFromNotifications')[0];
+				switch(typeOf){
+					case 'accept-frequest':
+						//show success message
+						document.getElementsByName('_successFriendRequestFromNotifications')[0].innerHTML = "Friend request accepted succesfully.";
+						successMessage.style.display = "block";
+						setTimeout(function(){$(successMessage).fadeOut(1000);},3000);
+						break;
+					case 'reject-frequest':
+						//show success message
+						document.getElementsByName('_successFriendRequestFromNotifications')[0].innerHTML = "Friend request rejected succesfully.";
+						successMessage.style.display = "block";
+						setTimeout(function(){$(successMessage).fadeOut(1000);},3000);
+						break;
+					case 'delete-notification':
+						//show success message
+						document.getElementsByName('_successFriendRequestFromNotifications')[0].innerHTML = "Notification deleted succesfully.";
+						successMessage.style.display = "block";
+						setTimeout(function(){$(successMessage).fadeOut(1000);},3000);
+						break;
+					default:
+						break;
+				}
+			}
 		}
 	);
+}
 
+//function which deletes selected notification
+function deleteNotification(idNotif){
+	$.ajax({
+		type: "POST",
+		url: "Includes/deleteNotification.php",
+		data: {
+			_idNotif: idNotif
+		},
+		success: function(){
+			//reload notificationsPage
+			togglePageNotifications('delete-notification');
+		}
+	});
+}
+
+function deleteNotificationExcess(idUserToSee){
+	$.ajax({
+		type: "POST",
+		url: "Includes/deleteNotificationExcess.php",
+		data: {//you are not passing the right id
+			_idUser: idUserToSee
+		},
+		success: function(){
+			//reload notificationsPage
+
+		}
+	});
 }

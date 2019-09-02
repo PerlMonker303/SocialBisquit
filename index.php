@@ -50,7 +50,7 @@
 
 <div id="tools">
   <?php
-  if($_SESSION['userId'])//error here
+  if(session_status() == PHP_SESSION_NONE)//error here
    echo '<div id="_secretUserId" style="display: none;">'.$_SESSION['userId'].'</div>';
   ?>
 
@@ -236,10 +236,6 @@
     <div id="container-profile-options-frame">
       <div id="container-profile-options-button">
         <img class="formButton" src="Icons/IconOptions.png" name="profile-option-button"></img>
-        <!-- adding hidden menu for options-->
-        <ul id="container-profile-options-dropdown" >
-          <li class="dropdownOption" class="formButton">Coming soon</li>
-        </ul>
       </div>
 
       <h2><i>Welcome to your profile</i></h2>
@@ -267,7 +263,8 @@
             $resultCheck = mysqli_stmt_get_result($stmt);
             if($row = mysqli_fetch_assoc($resultCheck)){
               echo  '
-                <p>'.$row['bio'].'</p>
+                <p name="_bioParagraphProfile">'.$row['bio'].'</p>
+                <button class="formButton" name="_editBioParagraphProfile">Edit</button>
               ';
             }else{
               echo  '
@@ -281,11 +278,14 @@
 
 
     </div>
+
+
     <div id="container-profile-inside-menu">
       <div name="_profileMenuButton1"><h3>Posts</h3></div>
       <div name="_profileMenuButton2"><h3>Shares</h3></div>
       <div name="_profileMenuButton3"><h3>Friends</h3></div>
       <div name="_profileMenuButton4"><h3>Messages</h3></div>
+      <div name="_profileMenuButton5"><h3>Settings</h3></div>
     </div>
     <div name="container-profile-success-message" style="display: none;">Success</div>
     <div id="container-profile-inside-frame">
@@ -386,6 +386,7 @@
 
   <div id="container-news-frame" style="display: none;">
     <span><i>Click on the notifications to mark them as read</i></span>
+    <h4 name="_newsNotificationSuccessMessage" style="display: none;">-message-</h4>
     <div id="container-news-inside-frame">
       <span>Loading...</span>
     </div>

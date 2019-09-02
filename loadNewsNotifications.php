@@ -8,6 +8,9 @@
   $limit = 3;
   $localId = 0;
 
+  //adding success message for acceptng/rejecting frequests
+  //echo '<h4 name="_newsNotificationSuccessMessage" style="display: none;">-message-</h4>';
+
   //checking friend requests
   $sql_req = "SELECT * FROM tbl_frequests WHERE idFriend = ? LIMIT ?";
   $stmt_req = mysqli_stmt_init($conn);
@@ -130,8 +133,6 @@
 
   if($nothingNew == true){
     echo '<h3>There are no new notifications to be shown.</h3>';
-  }else if($totalNews > 2){
-    echo '<i>And many more...</i>';
   }
 
 

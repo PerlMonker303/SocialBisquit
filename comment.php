@@ -34,7 +34,7 @@
 
     //adding event to notification table
     $typeOf = "commentedPost";
-    $content = " commented on your post.";
+    $content = " commented on your <i name=\"_newsNotificationClickPost\" onclick=\"clickNewsNotificationPost($postId)\">post.</i>";
     $zero = 0;
     $sql_add1 = "INSERT INTO tbl_notifications(idUser, idPost, idUserToSee, typeOf, content, dateOf, isRead) VALUES (?, ?, ?, ?, ?, NOW(), ?)";
     $stmt_add1 = mysqli_stmt_init($conn);

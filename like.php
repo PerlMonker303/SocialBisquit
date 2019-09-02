@@ -19,6 +19,10 @@
     mysqli_stmt_bind_param($stmt_del, "ii", $userId, $postId);
     mysqli_stmt_execute($stmt_del);
 
+    //delete event from notification
+    $sql_del1 = "DELETE FROM tbl_notifications WHERE idUser = '$userId' && idPost = '$postId'";
+    mysqli_query($conn, $sql_del1);
+
   }else{
     //adding user to tbl_likes
     $sql_add = "INSERT INTO tbl_likes(idPost,idUser) VALUES (?, ?)";
@@ -43,7 +47,7 @@
 
     //adding event to notification table
     $typeOf = "likedPost";
-    $content = " liked your post.";
+    $content = " liked your <i name=\"_newsNotificationClickPost\" onclick=\"clickNewsNotificationPost($postId)\">post.</i>";
     $zero = 0;
     $sql_add1 = "INSERT INTO tbl_notifications(idUser, idPost, idUserToSee, typeOf, content, dateOf, isRead) VALUES (?, ?, ?, ?, ?, NOW(), ?)";
     $stmt_add1 = mysqli_stmt_init($conn);

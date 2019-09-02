@@ -49,11 +49,13 @@
 
       //adding the posts
       $newName = "local_".$localId;
+      $datePosted = $row['datePosted'];
+      $newDate = date('d-m-Y', strtotime($datePosted));
       echo
       '<div class="container-main-frame" name="'.$newName.'">
         <div class="container-header-content">
           <h2>'.$row['title'].'</h2>
-          <h3><img src="Pictures/'.$postImage.'" onclick="openAProfile(\''.$row['idUser'].'\')"></img> <span onclick="openAProfile(\''.$row['idUser'].'\')">'.$userName.'</span> on <span>'.$row['datePosted'].'</span>
+          <h3><img src="Pictures/'.$postImage.'" onclick="openAProfile(\''.$row['idUser'].'\')"></img> <span onclick="openAProfile(\''.$row['idUser'].'\')">'.$userName.'</span> on <span>'.$newDate.'</span>
             <span style="display: none;">'.$postImage.'</span>
           </h3>
 

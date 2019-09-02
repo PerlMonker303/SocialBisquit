@@ -71,11 +71,11 @@
         <td><textarea class="inputArea" name="setup_el10" required></textarea></td>
       </tr>
       <tr>
-        <td class="table-first">Upload a picture </td>
-        <td><input type="file" class="inputArea" name="setup_el11" required></input> (.png,.jpg,.jpeg) max 50kb</td>
-
+        <td class="table-first">Upload a picture</td>
+        <td><input type="file" class="inputArea" name="setup_el11" required></input> (.png,.jpg,.jpeg) <50kb</td>
       </tr>
     </table>
+    <p>*It is advisable to create an account from a computer</br> - signing up from a smartphone might cause some yet-to-be-fixed image bugs*</p>
     <div id="profile-setup-buttons">
       <button class="formButton" type="submit" name="update-submit">Update</button>
       <input type="button" class="formButton" onclick="resetProfileSetup()" value="Reset"></input>

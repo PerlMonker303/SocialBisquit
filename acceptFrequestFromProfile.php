@@ -54,7 +54,7 @@
         if(mysqli_query($conn,$sql_notif)){
           echo '<h3>Accept request</h3>';
         }else{
-          header("Location: ../index.php?error=sqlerror'.$lastId1.'-".mysqli_error($conn));
+          header("Location: ../index.php?error=sqlerror".mysqli_error($conn));
           exit();
         }
       }

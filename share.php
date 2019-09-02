@@ -34,7 +34,7 @@
 
   //adding event to notification table
   $typeOf = "sharedPost";
-  $content = " shared your post.";
+  $content = " shared your <i name=\"_newsNotificationClickPost\" onclick=\"clickNewsNotificationPost($postId)\">post.</i>";
   $zero = 0;
   $sql_add1 = "INSERT INTO tbl_notifications(idUser, idPost, idUserToSee, typeOf, content, dateOf, isRead) VALUES (?, ?, ?, ?, ?, NOW(), ?)";
   $stmt_add1 = mysqli_stmt_init($conn);
