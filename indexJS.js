@@ -1,6 +1,5 @@
 var basicContainer=0;
 var nextNumber = 3;
-var isOpenedOptionsDropdown = false;
 
 window.onload = loadFunction;
 function loadFunction(){
@@ -16,7 +15,28 @@ function loadFunction(){
 	}
 
 	//for activating profile-options-dropdown list
-	$("[name='profile-option-button']").click(selectSettingsMenu);
+	$("[name='profile-option-button']").click(toggleProfileOptionsList);
+	//click events for options
+	$("[name='_optionList1']").click(selectSettingsMenu);
+	$("[name='_optionList2']").click(function(){
+		$("[name='_logoutButton']").trigger('click');
+	});
+}
+
+var isProfileOptionsList = false;
+
+function toggleProfileOptionsList(){
+	if(isProfileOptionsList == true){
+		isProfileOptionsList = false;
+
+		document.getElementById('container-profile-triangle').style.display = "none";
+		document.getElementById('container-profile-options-list').style.display = "none";
+	}else{
+		isProfileOptionsList = true;
+
+		document.getElementById('container-profile-triangle').style.display = "block";
+		document.getElementById('container-profile-options-list').style.display = "block";
+	}
 }
 
 var today;
@@ -105,14 +125,11 @@ function addContainer(){
 				dots.getElementsByTagName('p')[0].innerHTML = dots.getElementsByTagName('p')[0].innerHTML + "...";
 				document.getElementById('content').insertBefore(newEl,lastDiv);
 			}
-			//updating database
-			var result = "<?php echo('salami');?>";
 			//closing the form
 			cancelArticle();
 			//showing notification
 			//toggleNotification(0);
 			//setTimeout(function(){toggleNotification(-1);},2500);
-
 		}
 	}
 }
@@ -122,7 +139,8 @@ function toggleNotification(number){
 	if(x){
 		$(x).fadeOut(1200);
 		if(typeof window.history.pushState == 'function') {
-        window.history.pushState({}, "Hide", "http://localhost/socialCrushrApp/index.php");
+        //window.history.pushState({}, "Hide", "http://localhost/socialCrushrApp/index.php");
+				window.history.pushState({}, "Hide", "https://anti-social-crushr.herokuapp.com/index.php");
     }
 	}
 }
@@ -184,6 +202,9 @@ function loadComments(){
 		{
 			commentNewCount: commentCount,
 			commentPostId: document.getElementById('container-full-comment-section').getElementsByTagName('span')[0].innerHTML
+		}, function(){
+			//success
+
 		}
 	);
 }
@@ -249,6 +270,13 @@ function showSuccessMessage(type){
 		successMessage = document.getElementsByName('_newCommentSuccess')[0];
 	}else if(type=="share"){
 		successMessage = document.getElementsByName('_newShareSuccess')[0];
+	}else if(type == "likePicture"){
+		successMessage = document.getElementsByName('_newLikeSuccessPicture')[0];
+		if(successMessage.innerHTML == "Picture liked succesfully."){
+			successMessage.innerHTML = "You no longer like this post.";
+		}else{
+			successMessage.innerHTML = "Picture liked succesfully.";
+		}
 	}
 	successMessage.style.display = "block";
 	setTimeout(function(){$(successMessage).fadeOut(1000);},3000);
@@ -289,43 +317,208 @@ function toggleHelpScreen(){
 			document.getElementById('container-help-2').style.display = "none";
 			document.getElementById('container-help-3').style.display = "none";
 			document.getElementById('container-help-4').style.display = "none";
+			document.getElementById('container-help-5').style.display = "none";
 			break;
 		case 1:
 			document.getElementById('container-help-1').style.display = "block";
 			document.getElementById('container-help-2').style.display = "none";
 			document.getElementById('container-help-3').style.display = "none";
 			document.getElementById('container-help-4').style.display = "none";
+			document.getElementById('container-help-5').style.display = "none";
 			break;
 		case 2:
 			document.getElementById('container-help-1').style.display = "none";
 			document.getElementById('container-help-2').style.display = "block";
 			document.getElementById('container-help-3').style.display = "none";
 			document.getElementById('container-help-4').style.display = "none";
+			document.getElementById('container-help-5').style.display = "none";
 			break;
 		case 3:
 			document.getElementById('container-help-1').style.display = "none";
 			document.getElementById('container-help-2').style.display = "none";
 			document.getElementById('container-help-3').style.display = "block";
 			document.getElementById('container-help-4').style.display = "none";
+			document.getElementById('container-help-5').style.display = "none";
 			break;
 		case 4:
 			document.getElementById('container-help-1').style.display = "none";
 			document.getElementById('container-help-2').style.display = "none";
 			document.getElementById('container-help-3').style.display = "none";
 			document.getElementById('container-help-4').style.display = "block";
+			document.getElementById('container-help-5').style.display = "none";
+			break;
+		case 5:
+		document.getElementById('container-help-1').style.display = "none";
+		document.getElementById('container-help-2').style.display = "none";
+		document.getElementById('container-help-3').style.display = "none";
+		document.getElementById('container-help-4').style.display = "none";
+		document.getElementById('container-help-5').style.display = "block";
 			break;
 		default:
 			break;
 	}
 }
 
+var forgotPasswordStep = 0;
+var forgotEmail = "";
+var forgotPassword = "";
+var forgotPasswordCheck = "";
+
+function forgotPasswordFunction(step){
+
+	//check if input field is empty
+	let inputField = document.getElementById('container-forgotPassword-frame').getElementsByTagName('input')[0];
+	if(inputField.value){
+		//0-closed
+		//1-getting the email adress
+		//2-answering secret question
+		//3-selecting new password
+		//4-confirm new password
+
+		switch(step){
+			case 0:
+				alert('You\'re in the wrong place :)');
+				break;
+			case 1:
+				$('#container-forgotPassword-frame').load(
+					'Includes/forgotPasswordPhase1.php',
+					{
+						_input: inputField.value
+					},function(){
+						forgotEmail = inputField.value;
+						inputField = document.getElementById('container-forgotPassword-frame').getElementsByTagName('input')[0];
+						if(inputField.value == 'User doesn\'t exist'){
+							let successMessage = document.getElementById('_successMessageForgotPassword');
+							successMessage.innerHTML = inputField.value;
+							successMessage.style.display = "block";
+							inputField.style.backgroundColor = "#FFA07A";
+							inputField.value = "";
+							setTimeout(function(){$(successMessage).fadeOut(1000, function(){
+								inputField.style.backgroundColor = "#f8f8f8";
+							});},2000);
+						}else if(inputField.value == 'This user has yet to set their secret question'){
+							let successMessage = document.getElementById('_successMessageForgotPassword');
+							successMessage.innerHTML = inputField.value;
+							successMessage.style.display = "block";
+							inputField.style.backgroundColor = "#FFA07A";
+							inputField.value = "";
+							setTimeout(function(){$(successMessage).fadeOut(1000, function(){
+								inputField.style.backgroundColor = "#f8f8f8";
+							});},2000);
+						}
+					}
+				);
+				break;
+			case 2:
+				inputField = document.getElementById('container-forgotPassword-frame').getElementsByTagName('input')[0];
+				$('#container-forgotPassword-frame').load(
+					'Includes/forgotPasswordPhase2.php',
+					{
+						_input: inputField.value,
+						_email: forgotEmail
+					}, function(){
+						inputField = document.getElementById('container-forgotPassword-frame').getElementsByTagName('input')[0];
+						if(inputField.value == 'Wrong answer'){
+							forgotPasswordStep = 1;
+							let successMessage = document.getElementById('_successMessageForgotPassword');
+							successMessage.innerHTML = inputField.value;
+							successMessage.style.display = "block";
+							inputField.style.backgroundColor = "#FFA07A";
+							inputField.value = "";
+							setTimeout(function(){$(successMessage).fadeOut(1000, function(){
+								inputField.style.backgroundColor = "#f8f8f8";
+							});},2000);
+						}
+					}
+				);
+				break;
+			case 3:
+				inputField = document.getElementById('container-forgotPassword-frame').getElementsByTagName('input')[0];
+				forgotPassword = inputField.value;
+				$('#container-forgotPassword-frame').load(
+					'Includes/forgotPasswordPhase3.php',
+					function(){
+						//nothing really
+					}
+				);
+
+				break;
+			case 4:
+				inputField = document.getElementById('container-forgotPassword-frame').getElementsByTagName('input')[0];
+				forgotPasswordCheck = inputField.value;
+				$('#container-forgotPassword-frame').load(
+					'Includes/forgotPasswordPhase4.php',
+					{
+						_input: inputField.value,
+						_email: forgotEmail,
+						_password: forgotPassword,
+						_passwordCheck: forgotPasswordCheck
+					},
+					function(){
+						inputField = document.getElementById('container-forgotPassword-frame').getElementsByTagName('input')[0];
+						if(inputField){
+							if(inputField.value == 'Passwords do not match'){
+								forgotPasswordStep = 1;
+								let successMessage = document.getElementById('_successMessageForgotPassword');
+								successMessage.innerHTML = inputField.value;
+								successMessage.style.display = "block";
+								inputField.style.backgroundColor = "#FFA07A";
+								inputField.value = "";
+								setTimeout(function(){$(successMessage).fadeOut(1000, function(){
+									inputField.style.backgroundColor = "#f8f8f8";
+								});},2000);
+							}
+						}else{
+							//hide container
+							let successMessage = document.getElementById('container-forgotPassword-frame');
+							setTimeout(function(){$(successMessage).fadeOut(1000);},4500);
+						}
+
+					}
+				);
+				break;
+			default:
+			 	break;
+		}
+	}else{
+		//prompt message
+		let successMessage = document.getElementById('_successMessageForgotPassword');
+		successMessage.style.display = "block";
+		inputField.style.backgroundColor = "#FFA07A";
+		setTimeout(function(){$(successMessage).fadeOut(1000, function(){
+			inputField.style.backgroundColor = "#f8f8f8";
+		});},2000);
+	}
+}
+
+var isLoadingLikedList = false;
+
 $(document).ready(function(){
+
+	//hide forgot password panel
+	document.getElementById('container-forgotPassword-frame').style.display = "none";
+
+	//event for _forgotPasswordButton
+	$('[name=_forgotPasswordButton]').click(function(){
+		//toggle forgotPasswordContainer
+		if(forgotPasswordStep == 0 || forgotPasswordStep == 1){
+			document.getElementById('container-forgotPassword-frame').style.display = "block";
+		}
+	});
+
 
 	//for clicking of the help button
 	$('#container-help-button').click(function(){
+		if(isFormOpen)
+			toggleForm();
+		if(isOpenedNews)
+			toggleNews();
 		toggleOverlay();
 		currentHelpScreen = 1;
 		toggleHelpScreen();
+		//scroll to top
+		document.body.scrollTop = 0; //for safari
+		document.documentElement.scrollTop = 0; //for the rest
 	});
 	//for closing the help panels
 	$('[name=help-button-close]').click(function(){
@@ -367,7 +560,11 @@ $(document).ready(function(){
 				//for clicking on the overlay
 				$('#overlay').click(function(){
 					if(isOpenedProfile == true){
-						toggleProfile();
+						if(isOpenedPictureContainer){
+							togglePictureContainer();
+						}else{
+							toggleProfile();
+						}
 					}else if(isFullContainerOpen == true){
 						//here
 						toggleFullContainer();
@@ -643,18 +840,24 @@ $(document).ready(function(){
 			$('._likedList').hover(function(e){
 				document.getElementById('container-liked-list').style.display = "block";
 				$('._likedList').mousemove(function(e){
-					//loading data
-					let x = document.getElementById('container-full-text-content');
-					let postId = x.getElementsByTagName('p')[1].innerHTML;
-					$('#container-liked-list').load("Includes/loadLikedList.php",{
-						_postId: postId
-					});
-					//calling function to show the container on mouse position
-					hoverDiv(e);
+					if(isLoadingLikedList == false){
+						isLoadingLikedList = true;
+
+						//loading data
+						let x = document.getElementById('container-full-text-content');
+						let postId = x.getElementsByTagName('p')[1].innerHTML;
+						$('#container-liked-list').load("Includes/loadLikedList.php",{
+							_postId: postId
+						});
+						//calling function to show the container on mouse position
+						hoverDiv(e);
+					}
+
 				});
 			});
 
 			$('._likedList').mouseleave(function(e){
+				isLoadingLikedList = false;
 				document.getElementById('container-liked-list').style.display = "none";
 			});
 		}
@@ -737,7 +940,19 @@ function hoverDiv(e){
 	$('#container-liked-list').css('top',top);
 	$('#container-liked-list').css('position','fixed');
 
-	//$('#container-liked-list').toggle();
+}
+
+function hoverDivPicture(e){
+	var left  = e.clientX  + "px";
+	var top  = e.clientY  + "px";
+
+	var div = document.getElementById('container-liked-picture-list');
+
+	div.style.left = left;
+	div.style.top = top;
+	$('#container-liked-picture-list').css('left',left);
+	$('#container-liked-picture-list').css('top',top);
+	$('#container-liked-picture-list').css('position','fixed');
 }
 
 //for hiding the profile when opening a post from the profile menu
@@ -820,7 +1035,7 @@ function toggleFullContainer(contId){
 				//adding the selected data to the full container
 				let x = document.getElementById('container-full-header-content');
 				x.getElementsByTagName('h1')[0].innerHTML = postTitle;
-				x.getElementsByTagName('img')[0].src = "Pictures/"+postImage;
+				x.getElementsByTagName('img')[0].src = postImage;
 				x.getElementsByTagName('h3')[1].innerHTML = postAuthor;
 				x.getElementsByTagName('h4')[0].innerHTML = "Published on " + postDate;
 			}
@@ -833,9 +1048,7 @@ function toggleFullContainer(contId){
 
 
 
-		//showing it
-		let fullContainer = document.getElementById('container-full-frame');
-		fullContainer.style.display = "block";
+
 		//changeBodyOpacity(true);
 		isFullContainerOpen = true;
 		if(isOpenedProfile == true || isOpenedOtherProfile == true){
@@ -859,6 +1072,10 @@ function toggleFullContainer(contId){
 		document.getElementsByName('_newCommentSuccess')[0].style.display = "none";
 		document.getElementsByName('_newShareSuccess')[0].style.display = "none";
 
+		//showing it
+		let fullContainer = document.getElementById('container-full-frame');
+		fullContainer.style.display = "block";
+
 		//location the full container at the top of the screen
 		let topOffset = 85;
 		fullContainer.style.top = $(window).scrollTop()+topOffset;
@@ -878,6 +1095,8 @@ function toggleLoginContainer(){
 		if(openedLoginContainer == true){
 			fullLoginContainer.style.display = "none";
 			openedLoginContainer = false;
+			document.getElementById('container-forgotPassword-frame').style.display = "none";
+			forgotPasswordStep = 0;
 		}else{
 			if(openedSignupContainer == true)
 				toggleSignupContainer();
@@ -1013,6 +1232,7 @@ function changeTopBannerRight(isLoggedIn){
 //function for canceling updating bio - used twice so it needs to be sepparate to avoid repetition
 var originalBio = "";
 function cancelBioParagraphProfileFunction(){
+	//alert('canceling it');
 	//change textarea into p
 	let bioTextArea = document.getElementsByName('_bioTextAreaProfile')[0];
 	let bioParagraph = document.createElement('p');
@@ -1075,9 +1295,11 @@ function toggleProfile(){
 		  );
 
 			//add event for edit bio button
-			$('[name=_editBioParagraphProfile]').click(function(){
+			$('[name=_editBioParagraphProfile]').on('click', function(){
+				alert('called click');
 				if(isOpenedBioEditMode == false){
-					isOpenedBioEditMode = true;
+					//alert('opening it');
+
 					//change p into textarea
 					let bioParagraph = document.getElementsByName('_bioParagraphProfile')[0];
 					let bioTextArea = document.createElement('textarea');
@@ -1095,9 +1317,10 @@ function toggleProfile(){
 					btnCancel.innerHTML = "Cancel";
 					document.getElementById('container-profile-header').appendChild(btnCancel);
 					$('[name=_cancelBioParagraphProfile]').click(cancelBioParagraphProfileFunction);
-
-
-				}else{
+					event.stopPropagation();
+					isOpenedBioEditMode = true;
+				}else if(isOpenedBioEditMode == true){
+					//alert('updating it');
 					//change textarea into p
 					let bioTextArea = document.getElementsByName('_bioTextAreaProfile')[0];
 					let bioParagraph = document.createElement('p');
@@ -1128,15 +1351,22 @@ function toggleProfile(){
 				}
 			});
 		}else{
+
 			$('#container-profile-inside-frame').css("display", "grid");
 			$('#container-profile-inside-frame').css("height", "auto");
 			isFriendsProfilePageOpen = false;
 			isOpenedProfile = false;
+			if(isOpenedBioEditMode){
+				cancelBioParagraphProfileFunction();
+				isOpenedBioEditMode = false;
+			}
+			if(isProfileOptionsList){
+				toggleProfileOptionsList();
+			}
 			profileContainer.style.display = "none";
+
 			//changeBodyOpacity(false);
 			toggleOverlay('profileContainer');
-			if(isOpenedOptionsDropdown)
-				toggleOptionButton();
 			changeSelectedButton(0);
 
 		}
@@ -1144,9 +1374,10 @@ function toggleProfile(){
 		//opening from fullcontainer
 		toggleFullContainer();
 		loadProfileOptionsHeaderData();
-		isOpenedProfile = true;
+
 		profileContainer.style.display = "block";
-		toggleOverlay('profileContainer');
+		if(isOpenedProfile == false)
+			toggleOverlay('profileContainer');
 		let userId = document.getElementsByName('_loggedUserId')[0].value;
 		isLoadingProfilePages = true;
 		$('#container-profile-inside-frame').load(
@@ -1157,6 +1388,7 @@ function toggleProfile(){
 				isLoadingProfilePages = false;
 			}
 		);
+		isOpenedProfile = true;
 	}
 }
 
@@ -1215,7 +1447,6 @@ var isOpenedOverlay = false;
 
 function toggleOverlay(type){
 	if(isOpenedOverlay == false){
-		//alert('opening');
 		document.getElementById("overlay").style.display = "block";
 		isOpenedOverlay = true;
 		//changing z-index
@@ -1223,10 +1454,13 @@ function toggleOverlay(type){
 			document.getElementById("container-full-frame").style.zIndex = "5";
 		else if(type == 'profileContainer')
 			document.getElementById("container-profile-frame").style.zIndex = "5";
-		else if(type = 'otherProfileContainer')
+		else if(type == 'otherProfileContainer')
 			document.getElementById('container-profile-other-frame').style.zIndex = "5";
+		else if(type == 'pictureContainer'){
+			document.getElementById('container-picture-frame').style.zIndex = "6";
+		}
 	}else if(isOpenedOverlay == true){
-		//alert('closing');
+
 		document.getElementById("overlay").style.display = "none";
 		isOpenedOverlay = false;
 		//changing z-index
@@ -1234,8 +1468,17 @@ function toggleOverlay(type){
 			document.getElementById("container-full-frame").style.zIndex = "3";
 		}else if(type == 'profileContainer'){
 			document.getElementById("container-profile-frame").style.zIndex = "3";
-		}else if(type = 'otherProfileContainer'){
+		}else if(type == 'otherProfileContainer'){
 			document.getElementById('container-profile-other-frame').style.zIndex = "3";
+		}else if(type == 'pictureContainer'){
+			if(isOpenedPictureContainer == true){
+
+			}else{
+				isOpenedOverlay = true;
+				document.getElementById("overlay").style.display = "block";
+				document.getElementById("container-profile-frame").style.zIndex = "3";
+				document.getElementById('container-picture-frame').style.zIndex = "6";
+			}
 		}
 	}
 
@@ -1617,7 +1860,7 @@ var wasFullContainerLoadedFromNotificationPage = false;
 
 function markNotificationAsRead(idNotif){
 	if(wasFullContainerLoadedFromNotificationPage == true){
-		alert('asd');
+		//alert('asd');
 	}
 	$.ajax({
 		type: "POST",
@@ -1737,4 +1980,17 @@ function deleteNotificationExcess(idUserToSee){
 
 		}
 	});
+}
+
+function likeComment(){
+	//alert('liked');
+	alert('Cooming soon');
+}
+
+function commentOnComment(){
+	alert('Cooming soon');
+}
+
+function reportComment(){
+	alert('Coming soon');
 }

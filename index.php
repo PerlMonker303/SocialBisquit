@@ -6,17 +6,18 @@
 ?>
 <html>
 <head>
-<title>Anti-Social CrushR</title>
+<title>Social Bisquit</title>
 <script
   src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js" type="text/javascript">
 </script>
 <script src="Scripts/indexJS.js" type="text/javascript"></script>
 <script src="Scripts/profileJS.js" type="text/javascript"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <link rel="stylesheet" href="Style/indexCSS.css" type="text/css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <meta name="description" content="This is full-out social networking platform that mimics facebook and social dating websites, providing users with an ad-free environment.">
 </head>
-<body bgcolor="#f4f5f4" onload="loadFunction()">
+<body onload="loadFunction()">
 
 
 <div class="topBanner">
@@ -35,7 +36,7 @@
         echo '<h1 name="_toggleNews">News<span name="_newNewsCounter" style="display: none;"><span>37</span></span></h1>
         <h1 name="_toggleProfile">Profile</h1>
         <div>
-        <input type="submit" value="Log out" class="formButton" onclick="logoutFunction()"></input>
+        <input type="submit" value="Log out" class="formButton" name="_logoutButton" onclick="logoutFunction()"></input>
         </div>';
       }else{
         echo '<h1 onclick="toggleLoginContainer()">Log in</h1>
@@ -55,18 +56,18 @@
   ?>
 
   <form action="Includes/publish.php" method="post" id="container-form-main" style="display: none;">
-    <h2 >Contribute to the website and add your own piece of information down below</h2>
+    <h2>What's on your mind?</h2>
     <div id="container-form-wrapper">
       <div id="container-form-title">
         <p>Article title:</p>
         <input type="text" class="inputArea" name="_titleName" required maxlength="70"></input>
-        <p>Author name:</p>
+
+        <!--<p>Author name:</p>
         <?php
           $userName = $_SESSION['userFName']." ".$_SESSION['userLName'];
           echo '<input type="text" class="inputArea" name="_authorName" required maxlength="45" disabled
           value = "'.$userName.'"></input>';
-        ?>
-
+        ?>-->
       </div>
       <div id="container-form-text">
         <p>Content - keep it simple and on point</p>
@@ -147,11 +148,17 @@
         }else if($_GET['error'] == "fileProfilePicFailedUpload"){
           echo '<h2 id="container-notification-title">Error</h2>
           <p id="container-notificatiion-content">The picture has failed to upload to the database.</p>';
+        }else if($_GET['error'] == "wrongDate"){
+          echo '<h2 id="container-notification-title">Error</h2>
+          <p id="container-notificatiion-content">The chosen birth date must be a past date (before today).</p>';
+        }else if($_GET['error'] == "wrongLength"){
+          echo '<h2 id="container-notification-title">Error</h2>
+          <p id="container-notificatiion-content">Some inputs are too long.</p>';
         }
         echo '</div>';
       }
      ?>
-  <form id="container-login-frame" action="Includes/login.php" method="post" style="display: none;">
+  <form id="container-login-frame" action="Includes/login.php" method="post">
     <div class="container-logsign-title">
       <h3>Log in with an existing account</h3>
     </div>
@@ -171,9 +178,17 @@
       <button class="formButton" onclick="toggleLoginContainer()">Cancel</button>
       <button type="submit" class="formButton" name="login-submit" onclick="loginFunction()">Log in</button>
     </div>
+    <span name='_forgotPasswordButton'>I forgot my password</span>
   </form>
+  <div id="container-forgotPassword-frame">
+    <h3>Don't worry, we've got your back :)</h3>
+    <span>What's your email address?</span>
+    <input type="text" class="inputArea"></input></br>
+    <button class="formButton" id='_forgotNextButton' onclick="forgotPasswordFunction(1)">Next</button>
+    <span id='_successMessageForgotPassword' style="display: none;">You can't leave a field empty.</span>
+  </div>
 
-  <form id="container-signup-frame" action="Includes/signup.php" method="post" style="display: none;">
+  <form id="container-signup-frame" action="Includes/signup.php" method="post">
     <div class="container-logsign-title">
       <h3>Create a new account down below</h3>
     </div>
@@ -208,7 +223,7 @@
   </form>
 
 
-  <div id="container-profile-frame" style="display: none;">
+  <div id="container-profile-frame">
     <div id="container-profile-exit">
       <button class="formButton" name="_toggleProfile">Close</button>
     </div>
@@ -222,23 +237,47 @@
           mysqli_stmt_bind_param($stmt, 'i', $_SESSION['userId']);
           mysqli_stmt_execute($stmt);
 
-          $result = mysqli_stmt_get_result($stmt);
-          $row = mysqli_fetch_assoc($result);
-          $imagePath = $row['nameProfilePic'];
-          if($imagePath != "")
-            echo '<img src="Pictures/'.$imagePath.'"></img>';
-          else
-            echo '<img src="Pictures/defaultImage.jpg"></img>';
-        }
 
+          $resultCheck = mysqli_stmt_get_result($stmt);
+          $rowCheck = mysqli_fetch_assoc($resultCheck);
+
+          if(($rowCheck['secretAnswer'] && $rowCheck['secretAnswer'] == 'empty') || !$rowCheck['secretAnswer']){
+            echo '<img src="https://res.cloudinary.com/hgfmqcnjc/image/upload/v1567858286/defaultImage_t3bfth.jpg"></img>';
+          }else{
+            $imagePath = $rowCheck['nameProfilePic'];
+            echo '<img src="'.$imagePath.'"></img>
+            <div id="container-profile-picture-option">
+              <span>Change picture</span>
+              <input name="_changeProfilePictureInput" type=\'file\'></input>
+            </div>
+            ';
+          }
+        }
        ?>
+
+    </div>
+    <div id="profile-picture-success-message">
+       <span>Picture changed</span>
     </div>
     <div id="container-profile-options-frame">
-      <div id="container-profile-options-button">
-        <img class="formButton" src="Icons/IconOptions.png" name="profile-option-button"></img>
-      </div>
+      <h2>
+        <i>Welcome to your profile</i>
+        <div id="container-profile-options-button">
+          <img class="formButton" src="Icons/IconOptions.png" name="profile-option-button"></img>
+        </div>
+        <!--Triangle-->
+        <div id="container-profile-triangle">
 
-      <h2><i>Welcome to your profile</i></h2>
+        </div>
+        <div id="container-profile-options-list">
+          <div class="container-profile-option" name="_optionList1">
+            <span>Settings</span>
+          </div>
+          <div class="container-profile-option" name="_optionList2">
+            <span>Log out</span>
+          </div>
+        </div>
+      </h2>
 
       <table name="_loadProfileOptionsHeader">
 
@@ -261,15 +300,16 @@
             mysqli_stmt_bind_param($stmt, 'i', $currentId);
             mysqli_stmt_execute($stmt);
             $resultCheck = mysqli_stmt_get_result($stmt);
-            if($row = mysqli_fetch_assoc($resultCheck)){
-              echo  '
-                <p name="_bioParagraphProfile">'.$row['bio'].'</p>
-                <button class="formButton" name="_editBioParagraphProfile">Edit</button>
-              ';
-            }else{
+            $rowCheck = mysqli_fetch_assoc($resultCheck);
+            if(($rowCheck['secretAnswer'] && $rowCheck['secretAnswer'] == 'empty') || !$rowCheck['secretAnswer']){
               echo  '
                 <p>Your bio is empty.</p>
                 <input name="_showProfileSetupForm" class="formButton" type="button" value="Tell us about yourself"></input>
+              ';
+            }else{
+              echo  '
+                <p name="_bioParagraphProfile">'.$rowCheck['bio'].'</p>
+                <button class="formButton" name="_editBioParagraphProfile">Edit</button>
               ';
             }
           }
@@ -298,7 +338,7 @@
   </div>
 
   <!--Other's people profile-->
-  <div id="container-profile-other-frame" style="display: none;">
+  <div id="container-profile-other-frame">
     <div id="container-profile-other-exit">
       <button class="formButton" name="_toggleOtherProfile">Close</button>
     </div>
@@ -328,53 +368,65 @@
   <div id="container-help-button">
     <h3>Help</h3>
   </div>
-  <div id="container-help-1" style="display: none;">
-    <h3>Welcome to the main screen</h3>
+  <div id="container-help-1">
+    <h3>Welcome to Social Bisquit</h3>
     <p>This is a tutorial meant to teach you how to properly use this platform.</p>
-    <span>Click next to continue.</span></br>
+    <span>Click <b>Next</b> to continue.</span></br>
     <div id="container-help-1-buttons">
       <button class="formButton" name="help-button-next">Next</button>
       <button class="formButton" name="help-button-close" style="float: left;">Close</button>
-      </br><span>1/4</span>
+    </br><span>1/5</span>
     </div>
 
   </div>
-  <div id="container-help-2" style="display: none;">
+  <div id="container-help-2">
     <h3>This is your main screen</h3>
     <p>Here you can see posts and articles posted by all of the users.</p>
-    <p>You can see more details about each post by clicking on <em>Read more...</em></p>
-    <span>Click next to continue.</span></br></br>
+    <p>By clicking on <b>Read more...</b> you can access further details linked to the selected post.</p>
+    <span>Click <b>Next</b> to continue.</span></br></br>
     <div id="container-help-2-buttons">
       <button class="formButton" name="help-button-next">Next</button>
       <button class="formButton" name="help-button-previous">Previous</button>
       <button class="formButton" name="help-button-close" style="float: left;">Close</button>
-      </br><span>2/4</span>
+    </br><span>2/5</span>
     </div>
   </div>
-  <div id="container-help-3" style="display: none;">
+  <div id="container-help-3">
     <h3>Contribute yourself</h3>
-    <p>If you wish to post anything, feel free to do so by clicking on the publish button above.</p>
-    <span>Click next to continue.</span></br></br>
+    <p>If you wish to post anything, feel free to do so by clicking on the <b>Publish</b> button above.</p>
+    <span>Click <b>Next</b> to continue.</span></br></br>
     <div id="container-help-3-buttons">
       <button class="formButton" name="help-button-next">Next</button>
       <button class="formButton" name="help-button-previous">Previous</button>
       <button class="formButton" name="help-button-close" style="float: left;">Close</button>
-      </br><span>3/4</span>
+    </br><span>3/5</span>
     </div>
   </div>
-  <div id="container-help-4" style="display: none;">
+  <div id="container-help-4">
     <h3>Customize your profile</h3>
-    <p>By clicking on your <em>Profile</em> you can add and modify personal information,
+    <p>By clicking on your <b>Profile</b> you can add and modify personal information,
     see your posts and shares as well as your friends list.</p>
-    <span>You are ready to go! Click finish to end this tutorial.</span></br></br>
+    <span>Click <b>Next</b> to continue.</span></br></br>
+    <div id="container-help-4-buttons">
+      <button class="formButton" name="help-button-next">Next</button>
+      <button class="formButton" name="help-button-previous">Previous</button>
+      <button class="formButton" name="help-button-close" style="float: left;">Close</button>
+    </br><span>4/5</span>
+    </div>
+  </div>
+  <div id="container-help-5">
+    <h3>Recieve notifications</h3>
+    <p>By clicking on <b>News</b>, a container with notifications will be prompted
+    where you can see the latest news relatable to you <b>(likes, comments, shares, friendrequests)</b>.</p>
+    <span>You are ready to go! Click <b>Finish</b> to end this tutorial.</span></br></br>
     <div id="container-help-4-buttons">
       <button class="formButton" name="help-button-close">Finish</button>
       <button class="formButton" name="help-button-previous">Previous</button>
-      </br><span>4/4</span>
+    </br><span>5/5</span>
     </div>
   </div>
 
-  <div id="container-full-frame" style="display: none;">
+  <div id="container-full-frame">
 
     <?php
       echo '
@@ -384,13 +436,23 @@
      ?>
   </div>
 
-  <div id="container-news-frame" style="display: none;">
+  <div id="container-news-frame">
     <span><i>Click on the notifications to mark them as read</i></span>
     <h4 name="_newsNotificationSuccessMessage" style="display: none;">-message-</h4>
     <div id="container-news-inside-frame">
       <span>Loading...</span>
     </div>
     <button class="formButton" name="_openNotificationPageButton">All notifications</button>
+  </div>
+
+  <div id="container-picture-frame">
+    <div id="container-picture-left-pane">
+      <img src=''></img>
+    </div>
+    <div id="container-picture-right-pane">
+
+    </div>
+
   </div>
 </div>
 
