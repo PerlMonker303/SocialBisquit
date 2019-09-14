@@ -10,3 +10,15 @@ It also serves the purpose of a dating platform, providing users with options to
   <li>retrieve your password in case it slipped your mind</li>
   <li>benefit from a fully-fledged notifications system</li>
 </ul>
+
+<h3>Tech stack:</h3>
+<ul>
+  <li>HTML</li>
+  <li>CSS</li>
+  <li>Javascript</li>
+  <li>jQuery</li>
+  <li>PHP</li>
+  <li>SQL</li>
+  <li>Local host provided by XAMPP</li>
+  <li>Online host provided by Heroku.com</li>
+</ul>
