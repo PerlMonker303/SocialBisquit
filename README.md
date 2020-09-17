@@ -1,8 +1,9 @@
-# SocialBisquit
+# SocialBisquit - OLD VERSION
+<a href="https://github.com/PerlMonker303/SocialBisquit1.0">Click here to go to the new repository</a></br>
 SocialBisquit is an ad-free social-media platform used to connect people from all over the world.
 It also serves the purpose of a dating platform, providing users with options to engage with other users and set dates (coming soon).
 
-<h2>Check it out at socialbisquit.herokuapp.com</h2>
+<h2>Check it out <a href="https://socialbisquit.herokuapp.com/index.php">here</a></h2>
 
 <h3><b>Features:</b></h3>
 <ul>
